@@ -12,6 +12,7 @@ import GenderSelect from './components/GenderSelect';
 import AvatarCustomization from './pages/AvatarCustomization';
 import AvatarGreeting from './pages/AvatarGreeting';
 import ProtectedRoute from './components/ProtectedRoute';
+import ConsultantDashboard from './pages/ConsultantDashboard';
 
 function App() {
   return (
@@ -31,13 +32,8 @@ function App() {
         <Route path="/avatar-customization" element={<AvatarCustomization />} />
         <Route path="/avatar-greeting" element={<AvatarGreeting />} />
         
-        {/* Placeholder Consultant Flow */}
-        <Route path="/consultant-flow" element={
-          <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-950 text-white">
-            <h1 className="text-3xl font-bold mb-4">Consultant Flow</h1>
-            <p className="text-zinc-400">This flow is currently under development.</p>
-          </div>
-        } />
+        {/* Consultant Flow */}
+        <Route path="/consultant-flow" element={<ConsultantDashboard />} />
         
         {/* Existing Flow */}
         <Route element={<ProtectedRoute requireTexture={false} />}>
