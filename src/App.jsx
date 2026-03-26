@@ -13,6 +13,7 @@ import AvatarCustomization from './pages/AvatarCustomization';
 import AvatarGreeting from './pages/AvatarGreeting';
 import ProtectedRoute from './components/ProtectedRoute';
 import ConsultantDashboard from './pages/ConsultantDashboard';
+import ConsultantChat from './pages/ConsultantChat';
 
 function App() {
   return (
@@ -34,6 +35,8 @@ function App() {
         
         {/* Consultant Flow */}
         <Route path="/consultant-flow" element={<ConsultantDashboard />} />
+        <Route path="/consultant-chat/:clientId" element={<ConsultantChat />} />
+        <Route path="/consultant-chat" element={<ConsultantChat />} />
         
         {/* Existing Flow */}
         <Route element={<ProtectedRoute requireTexture={false} />}>
