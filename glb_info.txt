@@ -1,0 +1,31 @@
+girl.glb:
+  Node [7] name=Object_7 meshName=0 skin=0
+  Node [9] name=Object_9 meshName=1 skin=0
+  Node [10] name=Object_10 meshName=2 skin=0
+  Node [11] name=Object_11 meshName=3 skin=0
+  Node [12] name=Object_12 meshName=4 skin=0
+  Node [13] name=Object_13 meshName=5 skin=0
+  Node [14] name=Object_14 meshName=6 skin=0
+  Node [15] name=Object_15 meshName=7 skin=0
+  Node [17] name=Object_17 meshName=CC_Base_Teeth_Std_Upper_Teeth_0 skin=0
+  Node [18] name=Object_18 meshName=CC_Base_Teeth_Std_Lower_Teeth_0 skin=0
+  Node [20] name=Object_20 meshName=CC_Base_Eye_Std_Eye_R_0 skin=0
+  Node [21] name=Object_21 meshName=CC_Base_Eye_Std_Cornea_R_0 skin=0
+  Node [22] name=Object_22 meshName=CC_Base_Eye_Std_Eye_L_0 skin=0
+  Node [23] name=Object_23 meshName=CC_Base_Eye_Std_Cornea_L_0 skin=0
+  Node [25] name=Object_25 meshName=8 skin=0
+  Node [26] name=Object_26 meshName=9 skin=0
+  Node [28] name=Object_28 meshName=10 skin=0
+  Node [29] name=Object_29 meshName=11 skin=0
+  Node [31] name=Object_31 meshName=Top_Top_lambert2_0_lambert7_0 skin=0
+  Node [33] name=Object_33 meshName=Boot_Boot_lambert4_0_lambert4_0 skin=0
+  Node [35] name=Object_35 meshName=model:Mesh_lambert10_0 skin=0
+  Node [37] name=Object_37 meshName=Boot_Boot_lambert4_1_lambert4_0 skin=0
+  Node [39] name=Object_39 meshName=Outfit_Japan_Skirt_Model_lambert12_0 skin=0
+  Node [41] name=Object_41 meshName=Outfit_Japan_Panties_Model_Default OBJ.003_0 skin=0
+
+dress01.glb:
+  Node [2] name=Cube.013_Material_0 meshName=Cube.013_Material_0 skin=undefined
+
+top01.glb:
+  Node [0] name=Object_2 meshName=Object_0 skin=undefined
