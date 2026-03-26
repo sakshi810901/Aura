@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Bell, LogOut, Send, Plus, MoreVertical, Smile } from 'lucide-react';
+import { ArrowLeft, Bell, LogOut, Send, Plus, MoreVertical, Smile, Check, X, Edit2, Save } from 'lucide-react';
 
 const ConsultantChat = () => {
   const navigate = useNavigate();
@@ -9,6 +9,10 @@ const ConsultantChat = () => {
   const [activeChat, setActiveChat] = useState(clientId || '1');
   const [messageInput, setMessageInput] = useState('');
   const [messages, setMessages] = useState({});
+  const [viewMode, setViewMode] = useState('chat'); // 'chat' or 'plan'
+  const [editingPlanId, setEditingPlanId] = useState(null);
+  const [editedPlanText, setEditedPlanText] = useState('');
+  const [plans, setPlans] = useState({});
   const messagesEndRef = useRef(null);
 
   // Dummy client data
@@ -42,6 +46,90 @@ const ConsultantChat = () => {
     }
   };
 
+  // Dummy AURA AI Plans
+  const defaultPlans = {
+    '1': {
+      title: 'AURA AI Plan',
+      mainGoal: "Let's adjust your diet gradually.",
+      intro: 'Here are some tips to help:',
+      items: [
+        {
+          id: 1,
+          text: 'Start by substituting snacks with fruits or nuts.',
+          checked: false,
+          edited: false
+        },
+        {
+          id: 2,
+          text: 'Choose healthier meals when dining out.',
+          checked: false,
+          edited: false
+        },
+        {
+          id: 3,
+          text: 'Drink more water to stay full.',
+          checked: false,
+          edited: false
+        }
+      ],
+      attachments: [
+        { id: 1, name: 'Gradual Junk Food Reduction.pdf', type: 'pdf' }
+      ]
+    },
+    '2': {
+      title: 'AURA AI Plan',
+      mainGoal: 'Build a stress management routine.',
+      intro: 'Here are recommended practices:',
+      items: [
+        {
+          id: 1,
+          text: 'Practice deep breathing exercises for 5 minutes daily.',
+          checked: false,
+          edited: false
+        },
+        {
+          id: 2,
+          text: 'Schedule breaks every 2 hours during work.',
+          checked: false,
+          edited: false
+        },
+        {
+          id: 3,
+          text: 'Try meditation or mindfulness apps.',
+          checked: false,
+          edited: false
+        }
+      ],
+      attachments: []
+    },
+    '3': {
+      title: 'AURA AI Plan',
+      mainGoal: 'Explore career transition options.',
+      intro: 'Consider these steps:',
+      items: [
+        {
+          id: 1,
+          text: 'Update your resume and LinkedIn profile.',
+          checked: false,
+          edited: false
+        },
+        {
+          id: 2,
+          text: 'Research companies in your target industry.',
+          checked: false,
+          edited: false
+        },
+        {
+          id: 3,
+          text: 'Network with professionals in your field.',
+          checked: false,
+          edited: false
+        }
+      ],
+      attachments: []
+    }
+  };
+
   // Dummy chat messages
   const defaultMessages = {
     '1': [
@@ -70,24 +158,6 @@ const ConsultantChat = () => {
         avatar: 'AI',
         text: "I'm here for you, Alex. What's causing the stress?",
         time: '10:22 AM',
-        type: 'text'
-      },
-      {
-        id: 4,
-        sender: 'aura',
-        name: 'AURA',
-        avatar: 'AI',
-        text: "I'm keeping up with the new habit.",
-        time: '10:23 AM',
-        type: 'text'
-      },
-      {
-        id: 5,
-        sender: 'client',
-        name: 'Alex Johnson',
-        avatar: 'A',
-        text: 'I have a big deadline coming up at work and I\'m worried I won\'t finish on time.',
-        time: '10:23 AM',
         type: 'text'
       }
     ],
@@ -134,8 +204,9 @@ const ConsultantChat = () => {
   };
 
   useEffect(() => {
-    // Initialize messages from dummy data
+    // Initialize messages and plans from dummy data
     setMessages(defaultMessages);
+    setPlans(defaultPlans);
   }, []);
 
   useEffect(() => {
@@ -145,6 +216,7 @@ const ConsultantChat = () => {
 
   const currentClient = clients[activeChat];
   const currentMessages = messages[activeChat] || [];
+  const currentPlan = plans[activeChat];
 
   const handleSendMessage = () => {
     if (messageInput.trim()) {
@@ -181,6 +253,39 @@ const ConsultantChat = () => {
         }));
       }, 1000);
     }
+  };
+
+  const handleEditPlan = (itemId, currentText) => {
+    setEditingPlanId(itemId);
+    setEditedPlanText(currentText);
+  };
+
+  const handleSavePlanEdit = (itemId) => {
+    setPlans({
+      ...plans,
+      [activeChat]: {
+        ...currentPlan,
+        items: currentPlan.items.map(item =>
+          item.id === itemId
+            ? { ...item, text: editedPlanText, edited: true }
+            : item
+        )
+      }
+    });
+    setEditingPlanId(null);
+    setEditedPlanText('');
+  };
+
+  const handleTogglePlanCheckbox = (itemId) => {
+    setPlans({
+      ...plans,
+      [activeChat]: {
+        ...currentPlan,
+        items: currentPlan.items.map(item =>
+          item.id === itemId ? { ...item, checked: !item.checked } : item
+        )
+      }
+    });
   };
 
   const handleLogout = () => {
@@ -272,7 +377,10 @@ const ConsultantChat = () => {
                   key={client.id}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setActiveChat(client.id)}
+                  onClick={() => {
+                    setActiveChat(client.id);
+                    setViewMode('chat');
+                  }}
                   className={`w-full text-left p-4 rounded-xl transition-all ${
                     activeChat === client.id
                       ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg'
@@ -324,7 +432,7 @@ const ConsultantChat = () => {
               animate={{ opacity: 1, y: 0 }}
               className="flex-1 bg-white rounded-2xl shadow-lg flex flex-col overflow-hidden"
             >
-              {/* Chat Header */}
+              {/* Chat Header with Tabs */}
               <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-200 px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <motion.button
@@ -352,83 +460,217 @@ const ConsultantChat = () => {
                 </button>
               </div>
 
-              {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-white to-purple-50/30">
-                <AnimatePresence>
-                  {currentMessages.map((msg, idx) => (
+              {/* View Mode Tabs */}
+              <div className="flex border-b border-purple-200 bg-white">
+                <button
+                  onClick={() => setViewMode('chat')}
+                  className={`flex-1 py-3 text-center font-semibold transition-colors ${
+                    viewMode === 'chat'
+                      ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  Chat
+                </button>
+                <button
+                  onClick={() => setViewMode('plan')}
+                  className={`flex-1 py-3 text-center font-semibold transition-colors ${
+                    viewMode === 'plan'
+                      ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  AURA AI Plan
+                </button>
+              </div>
+
+              {/* Messages Area or Plan Area */}
+              {viewMode === 'chat' ? (
+                <>
+                  <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-white to-purple-50/30">
+                    <AnimatePresence>
+                      {currentMessages.map((msg, idx) => (
+                        <motion.div
+                          key={msg.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: idx * 0.05 }}
+                          className={`flex gap-3 ${msg.sender === 'consultant' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          {msg.sender !== 'consultant' && (
+                            <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${getAvatarColor(msg.avatar)} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
+                              {msg.avatar}
+                            </div>
+                          )}
+                          <div className={`flex flex-col ${msg.sender === 'consultant' ? 'items-end' : 'items-start'}`}>
+                            {msg.sender !== 'consultant' && (
+                              <span className="text-xs font-semibold text-purple-900 mb-1">{msg.name}</span>
+                            )}
+                            <div className={`px-4 py-3 rounded-2xl max-w-xs ${
+                              msg.sender === 'consultant'
+                                ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
+                                : msg.sender === 'aura'
+                                ? 'bg-purple-100 text-purple-900'
+                                : 'bg-purple-50 text-purple-900 border border-purple-200'
+                            }`}>
+                              <p className="text-sm">{msg.text}</p>
+                            </div>
+                            <span className="text-xs text-gray-500 mt-1">{msg.time}</span>
+                          </div>
+                          {msg.sender === 'consultant' && (
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                              D
+                            </div>
+                          )}
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                    <div ref={messagesEndRef} />
+                  </div>
+
+                  {/* Message Input */}
+                  <div className="bg-white border-t border-purple-200 p-4">
+                    <div className="flex gap-3">
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        className="p-3 hover:bg-purple-50 rounded-full transition-colors text-purple-600"
+                      >
+                        <Plus size={20} />
+                      </motion.button>
+                      <div className="flex-1 flex items-center bg-purple-50 rounded-full px-4 gap-2 border border-purple-200">
+                        <input
+                          type="text"
+                          placeholder="Write a message..."
+                          value={messageInput}
+                          onChange={(e) => setMessageInput(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                          className="flex-1 bg-transparent py-3 text-purple-900 placeholder-purple-400 outline-none"
+                        />
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          className="p-2 text-purple-600 hover:text-purple-700 transition-colors"
+                        >
+                          <Smile size={20} />
+                        </motion.button>
+                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleSendMessage}
+                        className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full hover:shadow-lg transition-all"
+                      >
+                        <Send size={20} />
+                      </motion.button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                // Plan View
+                <div className="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-white to-purple-50/30">
+                  {currentPlan && (
                     <motion.div
-                      key={msg.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.05 }}
-                      className={`flex gap-3 ${msg.sender === 'consultant' ? 'justify-end' : 'justify-start'}`}
+                      className="max-w-2xl"
                     >
-                      {msg.sender !== 'consultant' && (
-                        <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${getAvatarColor(msg.avatar)} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
-                          {msg.avatar}
+                      {/* Plan Header */}
+                      <div className="mb-8">
+                        <h3 className="text-2xl font-bold text-purple-900 mb-4">{currentPlan.title}</h3>
+                        <div className="bg-purple-100 rounded-xl p-4 mb-4">
+                          <p className="text-purple-900 font-semibold text-lg">{currentPlan.mainGoal}</p>
                         </div>
-                      )}
-                      <div className={`flex flex-col ${msg.sender === 'consultant' ? 'items-end' : 'items-start'}`}>
-                        {msg.sender !== 'consultant' && (
-                          <span className="text-xs font-semibold text-purple-900 mb-1">{msg.name}</span>
-                        )}
-                        <div className={`px-4 py-3 rounded-2xl max-w-xs ${
-                          msg.sender === 'consultant'
-                            ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
-                            : msg.sender === 'aura'
-                            ? 'bg-purple-100 text-purple-900'
-                            : 'bg-purple-50 text-purple-900 border border-purple-200'
-                        }`}>
-                          <p className="text-sm">{msg.text}</p>
-                        </div>
-                        <span className="text-xs text-gray-500 mt-1">{msg.time}</span>
+                        <p className="text-purple-700 font-medium mb-4">{currentPlan.intro}</p>
                       </div>
-                      {msg.sender === 'consultant' && (
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                          D
+
+                      {/* Plan Items */}
+                      <div className="space-y-3 mb-6">
+                        {currentPlan.items.map((item) => (
+                          <motion.div
+                            key={item.id}
+                            whileHover={{ scale: 1.01 }}
+                            className="bg-white border border-purple-200 rounded-xl p-4 flex items-start gap-3"
+                          >
+                            <button
+                              onClick={() => handleTogglePlanCheckbox(item.id)}
+                              className={`flex-shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center mt-1 transition-all ${
+                                item.checked
+                                  ? 'bg-green-500 border-green-500'
+                                  : 'border-purple-300 hover:border-purple-500'
+                              }`}
+                            >
+                              {item.checked && <Check size={16} className="text-white" />}
+                            </button>
+
+                            <div className="flex-1">
+                              {editingPlanId === item.id ? (
+                                <div className="flex gap-2">
+                                  <input
+                                    autoFocus
+                                    type="text"
+                                    value={editedPlanText}
+                                    onChange={(e) => setEditedPlanText(e.target.value)}
+                                    className="flex-1 px-3 py-2 border border-purple-300 rounded-lg text-purple-900 outline-none focus:border-purple-500"
+                                  />
+                                  <button
+                                    onClick={() => handleSavePlanEdit(item.id)}
+                                    className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                                  >
+                                    <Save size={16} />
+                                  </button>
+                                  <button
+                                    onClick={() => setEditingPlanId(null)}
+                                    className="p-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors"
+                                  >
+                                    <X size={16} />
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-3">
+                                  <p className={`text-purple-900 ${item.checked ? 'line-through text-gray-500' : ''} ${item.edited ? 'italic' : ''}`}>
+                                    {item.text}
+                                  </p>
+                                  {item.edited && (
+                                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Edited</span>
+                                  )}
+                                  <button
+                                    onClick={() => handleEditPlan(item.id, item.text)}
+                                    className="p-1.5 ml-auto hover:bg-purple-50 rounded-lg transition-colors text-purple-600"
+                                    title="Edit plan item"
+                                  >
+                                    <Edit2 size={16} />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      {/* Attachments */}
+                      {currentPlan.attachments.length > 0 && (
+                        <div className="border-t border-purple-200 pt-6">
+                          <h4 className="font-semibold text-purple-900 mb-3">Attachments</h4>
+                          <div className="space-y-2">
+                            {currentPlan.attachments.map((attachment) => (
+                              <motion.div
+                                key={attachment.id}
+                                whileHover={{ scale: 1.02 }}
+                                className="bg-purple-50 border border-purple-200 rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-purple-100 transition-colors"
+                              >
+                                <div className="w-10 h-10 bg-purple-200 rounded-lg flex items-center justify-center text-purple-600 font-bold text-sm">
+                                  {attachment.type.toUpperCase()}
+                                </div>
+                                <span className="text-purple-900 font-medium flex-1">{attachment.name}</span>
+                                <span className="text-purple-600 text-sm">Download</span>
+                              </motion.div>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </motion.div>
-                  ))}
-                </AnimatePresence>
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Message Input */}
-              <div className="bg-white border-t border-purple-200 p-4">
-                <div className="flex gap-3">
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    className="p-3 hover:bg-purple-50 rounded-full transition-colors text-purple-600"
-                  >
-                    <Plus size={20} />
-                  </motion.button>
-                  <div className="flex-1 flex items-center bg-purple-50 rounded-full px-4 gap-2 border border-purple-200">
-                    <input
-                      type="text"
-                      placeholder="Write a message..."
-                      value={messageInput}
-                      onChange={(e) => setMessageInput(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                      className="flex-1 bg-transparent py-3 text-purple-900 placeholder-purple-400 outline-none"
-                    />
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      className="p-2 text-purple-600 hover:text-purple-700 transition-colors"
-                    >
-                      <Smile size={20} />
-                    </motion.button>
-                  </div>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleSendMessage}
-                    className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full hover:shadow-lg transition-all"
-                  >
-                    <Send size={20} />
-                  </motion.button>
+                  )}
                 </div>
-              </div>
+              )}
             </motion.div>
           )}
         </div>
