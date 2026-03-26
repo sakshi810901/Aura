@@ -15,6 +15,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ConsultantDashboard from './pages/ConsultantDashboard';
 import ConsultantChat from './pages/ConsultantChat';
 import ConsultantProfile from './pages/ConsultantProfile';
+import ConsultantPayment from './pages/ConsultantPayment';
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
         <Route path="/consultant-chat/:clientId" element={<ConsultantChat />} />
         <Route path="/consultant-chat" element={<ConsultantChat />} />
         <Route path="/consultant-profile" element={<ConsultantProfile />} />
+        <Route path="/consultant-payment" element={<ConsultantPayment />} />
         
         {/* Existing Flow */}
         <Route element={<ProtectedRoute requireTexture={false} />}>

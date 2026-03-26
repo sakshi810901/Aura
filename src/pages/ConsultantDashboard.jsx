@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LogOut, Home, MessageCircle, User as UserIcon, Settings, Bell, Search, CheckCircle, X } from 'lucide-react';
+import { LogOut, Home, MessageCircle, User as UserIcon, CreditCard, Bell, Search, CheckCircle, X } from 'lucide-react';
 
 const ConsultantDashboard = () => {
   const [username, setUsername] = useState('');
@@ -225,10 +225,11 @@ const ConsultantDashboard = () => {
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.02 }}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white text-purple-600 font-semibold transition-all hover:bg-purple-50"
+                onClick={() => navigate('/consultant-payment')}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white text-purple-600 font-semibold transition-all hover:bg-purple-50 cursor-pointer"
               >
-                <Settings size={20} />
-                Settings
+                <CreditCard size={20} />
+                Payments
               </motion.button>
               <motion.button
                 onClick={handleLogout}
