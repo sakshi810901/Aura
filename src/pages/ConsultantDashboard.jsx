@@ -217,7 +217,8 @@ const ConsultantDashboard = () => {
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.02 }}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white text-purple-600 font-semibold transition-all hover:bg-purple-50"
+                onClick={() => navigate('/consultant-profile')}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl bg-purple-100 text-purple-600 font-semibold transition-all hover:bg-purple-200 cursor-pointer w-full"
               >
                 <UserIcon size={20} />
                 Profile

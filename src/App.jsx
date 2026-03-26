@@ -14,6 +14,7 @@ import AvatarGreeting from './pages/AvatarGreeting';
 import ProtectedRoute from './components/ProtectedRoute';
 import ConsultantDashboard from './pages/ConsultantDashboard';
 import ConsultantChat from './pages/ConsultantChat';
+import ConsultantProfile from './pages/ConsultantProfile';
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
         <Route path="/consultant-flow" element={<ConsultantDashboard />} />
         <Route path="/consultant-chat/:clientId" element={<ConsultantChat />} />
         <Route path="/consultant-chat" element={<ConsultantChat />} />
+        <Route path="/consultant-profile" element={<ConsultantProfile />} />
         
         {/* Existing Flow */}
         <Route element={<ProtectedRoute requireTexture={false} />}>
