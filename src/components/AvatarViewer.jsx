@@ -344,6 +344,7 @@ useGLTF.preload('/models/avatar/animations/wave.glb');
 
 const AvatarViewer = ({ readOnlyMode = false, playWave = false }) => {
   const [modelScene, setModelScene] = useState(null);
+  const [activeTab, setActiveTab] = useState('tops');
   
   const [config, setConfig] = useState(() => {
     try {
@@ -431,7 +432,7 @@ const AvatarViewer = ({ readOnlyMode = false, playWave = false }) => {
       {/* Canvas Container on the left */}
       <div style={{ flex: 1, position: 'relative' }}>
         <Canvas
-          camera={{ position: [0, 0, 3], fov: 40 }}
+          camera={{ position: [0, 0, 3.2], fov: 55 }}
           style={{ width: '100%', height: '100%' }}
         >
           <Suspense fallback={<Loader />}>
@@ -450,7 +451,7 @@ const AvatarViewer = ({ readOnlyMode = false, playWave = false }) => {
                 enablePan={true}
                 minDistance={1.5}
                 maxDistance={6}
-                target={[0, 0, 0]} // Fix camera directly at the chest level of the manually offset avatar
+                target={[0, 0.5, 0]}
               />
             </ErrorBoundary>
           </Suspense>
@@ -470,7 +471,7 @@ const AvatarViewer = ({ readOnlyMode = false, playWave = false }) => {
         boxShadow: '-10px 0 30px rgba(0, 0, 0, 0.5)',
         zIndex: 10
       }}>
-        <div style={{ marginBottom: '30px' }}>
+        <div style={{ marginBottom: '20px' }}>
           <h2 style={{ 
             color: '#fff', 
             margin: '0 0 8px 0', 
@@ -489,9 +490,49 @@ const AvatarViewer = ({ readOnlyMode = false, playWave = false }) => {
           </p>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto', paddingRight: '4px' }}>
+        {/* Category Tabs */}
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(3, 1fr)', 
+          gap: '6px', 
+          marginBottom: '20px',
+          paddingBottom: '16px',
+          borderBottom: '1px solid rgba(255,255,255,0.1)'
+        }}>
+          {[
+            { id: 'tops', label: 'Tops' },
+            { id: 'bottoms', label: 'Bottoms' },
+            { id: 'dresses', label: 'Dresses' },
+            { id: 'shoes', label: 'Shoes' },
+            { id: 'skin', label: 'Skin Tone' },
+            { id: 'hair', label: 'Hairstyle' },
+            { id: 'tweak', label: 'Adjust' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                background: activeTab === tab.id ? 'rgba(187, 134, 252, 0.2)' : 'transparent',
+                color: activeTab === tab.id ? '#bb86fc' : '#a0a0a0',
+                border: activeTab === tab.id ? '1px solid rgba(187, 134, 252, 0.4)' : '1px solid transparent',
+                borderRadius: '8px',
+                padding: '8px 4px',
+                fontSize: '12px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                fontWeight: activeTab === tab.id ? '600' : 'normal',
+                textAlign: 'center'
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto', overflowX: 'hidden', paddingRight: '4px', flex: 1 }}>
           
           {/* Tops Selection */}
+          {activeTab === 'tops' && (
           <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <span style={{ color: '#ececec', fontFamily: 'sans-serif', fontSize: '15px', fontWeight: '500', display: 'block', marginBottom: '12px' }}>Tops</span>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -515,8 +556,10 @@ const AvatarViewer = ({ readOnlyMode = false, playWave = false }) => {
               ))}
             </div>
           </div>
+          )}
 
           {/* Bottoms Selection */}
+          {activeTab === 'bottoms' && (
           <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <span style={{ color: '#ececec', fontFamily: 'sans-serif', fontSize: '15px', fontWeight: '500', display: 'block', marginBottom: '12px' }}>Bottoms</span>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -540,8 +583,10 @@ const AvatarViewer = ({ readOnlyMode = false, playWave = false }) => {
               ))}
             </div>
           </div>
+          )}
 
           {/* Dresses Selection */}
+          {activeTab === 'dresses' && (
           <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <span style={{ color: '#ececec', fontFamily: 'sans-serif', fontSize: '15px', fontWeight: '500', display: 'block', marginBottom: '12px' }}>Dresses</span>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -564,8 +609,10 @@ const AvatarViewer = ({ readOnlyMode = false, playWave = false }) => {
               ))}
             </div>
           </div>
+          )}
 
           {/* Shoes Selection */}
+          {activeTab === 'shoes' && (
           <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <span style={{ color: '#ececec', fontFamily: 'sans-serif', fontSize: '15px', fontWeight: '500', display: 'block', marginBottom: '12px' }}>Shoes</span>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -590,8 +637,10 @@ const AvatarViewer = ({ readOnlyMode = false, playWave = false }) => {
               ))}
             </div>
           </div>
+          )}
 
           {/* Skin Tone Selection */}
+          {activeTab === 'skin' && (
           <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <span style={{ color: '#ececec', fontFamily: 'sans-serif', fontSize: '15px', fontWeight: '500', display: 'block', marginBottom: '12px' }}>
               Skin Tone
@@ -628,7 +677,9 @@ const AvatarViewer = ({ readOnlyMode = false, playWave = false }) => {
               ))}
             </div>
           </div>
+          )}
 
+          {activeTab === 'hair' && (
           <div style={{ 
             background: 'rgba(255, 255, 255, 0.03)',
             padding: '16px',
@@ -702,9 +753,10 @@ const AvatarViewer = ({ readOnlyMode = false, playWave = false }) => {
             )}
             
           </div>
+          )}
 
           {/* Clothing Tweak Controls (Visible only if a custom clothing is selected) */}
-          {(config.dressStyle !== 'none' || config.topStyle !== 'default' || config.bottomStyle !== 'default') && (
+          {activeTab === 'tweak' && (config.dressStyle !== 'none' || config.topStyle !== 'default' || config.bottomStyle !== 'default') && (
             <div style={{ background: 'rgba(255, 100, 100, 0.1)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255, 100, 100, 0.3)' }}>
               <span style={{ color: '#ffb3b3', fontFamily: 'sans-serif', fontSize: '13px', display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
                 Tool: Adjust Position (Current values can be copied)
@@ -800,7 +852,7 @@ const AvatarViewer = ({ readOnlyMode = false, playWave = false }) => {
 
         </div>
         
-        <div style={{ marginTop: 'auto', paddingTop: '30px' }}>
+        <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
           <button style={{
             width: '100%',
             padding: '14px',

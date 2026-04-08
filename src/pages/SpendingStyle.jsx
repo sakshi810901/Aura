@@ -43,7 +43,7 @@ const SpendingStyle = () => {
   const handleNext = () => {
     const spendingData = { style: styleId, dailySpend };
     localStorage.setItem('aura_spending_style', JSON.stringify(spendingData));
-    navigate('/gender-select');
+    navigate('/stress-habits');
   };
 
   // Stagger animation variant
