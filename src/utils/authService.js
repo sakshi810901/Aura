@@ -53,22 +53,42 @@ class AuthService {
 
   /**
    * Sign up new user
-   * @param {object} userData - User data (email, password, name, etc.)
-   * @returns {Promise<object>} - Created user data and token
+   * @param {object} userData - User data (full_name, email, password)
+   * @returns {Promise<object>} - Created user data
+   * @throws {Error} - With user-friendly error message
    */
   async signup(userData) {
     try {
-      const response = await apiClient.post('/auth/signup', userData);
-
-      if (response.access_token) {
-        apiClient.setToken(response.access_token);
-        localStorage.setItem('user', JSON.stringify(response.user || {}));
+      // Validate inputs
+      if (!userData.full_name || !userData.full_name.trim()) {
+        throw new Error('Please enter your full name');
+      }
+      if (userData.full_name.trim().length < 2) {
+        throw new Error('Full name must be at least 2 characters');
+      }
+      if (!userData.email || !userData.email.trim()) {
+        throw new Error('Please enter your email address');
+      }
+      if (!userData.password || !userData.password.trim()) {
+        throw new Error('Please enter a password');
+      }
+      if (userData.password.length < 8) {
+        throw new Error('Your password is too short. Please use at least 8 characters to keep your account secure.');
       }
 
+      const response = await apiClient.post('/auth/signup', {
+        full_name: userData.full_name.trim(),
+        email: userData.email.trim(),
+        password: userData.password.trim(),
+      });
+
+      // Return the created user data
       return response;
     } catch (error) {
-      console.error('Signup error:', error);
-      throw error;
+      // Re-throw with proper error message
+      const errorMsg = error.message || 'Sign up failed. Please try again.';
+      console.error('[v0] Signup error:', errorMsg);
+      throw new Error(errorMsg);
     }
   }
 

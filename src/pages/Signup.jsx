@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, User, Check, Users } from 'lucide-react';
+import { authService } from '../utils/authService';
 
 const Signup = () => {
   const [fullName, setFullName] = useState('');
@@ -12,23 +13,88 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [role, setRole] = useState('user');
   const [agree, setAgree] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (fullName.trim() && email.trim() && password.trim() && password === confirmPassword && agree) {
-      // Simulate signup with dummy data
+    setError('');
+    setIsLoading(true);
+
+    if (!fullName.trim() || !email.trim() || !password.trim()) {
+      setError('Please fill in all fields');
+      setIsLoading(false);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      setIsLoading(false);
+      return;
+    }
+
+    if (password.length < 8) {
+      setError('Your password is too short. Please use at least 8 characters to keep your account secure.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!agree) {
+      setError('Please agree to the Terms and Privacy Policy');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // Call signup API
+      const response = await authService.signup({
+        full_name: fullName.trim(),
+        email: email.trim(),
+        password: password.trim(),
+      });
+
+      console.log('[v0] Signup successful:', response);
+
+      // Store user data
       localStorage.setItem('username', email.trim());
       localStorage.setItem('role', role);
 
-      // Route based on role
-      if (role === 'consultant') {
-        navigate('/consultant-flow');
-      } else {
-        // Normal user goes to welcome setup flow
-        navigate('/welcome-setup');
+      // Show success message
+      setShowSuccess(true);
+
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        if (role === 'consultant') {
+          navigate('/consultant-flow');
+        } else {
+          navigate('/login');
+        }
+      }, 2000);
+    } catch (err) {
+      console.error('[v0] Signup error caught:', err);
+      let errorMsg = err.message || 'Sign up failed. Please try again.';
+
+      // Handle specific error cases from backend
+      if (err.status === 400) {
+        // Check if it's a duplicate email error
+        if (errorMsg.includes('email') || errorMsg.includes('already')) {
+          errorMsg = 'This email is already registered. Try logging in or use a different email.';
+        }
+      } else if (err.status === 422) {
+        // Validation error
+        errorMsg = errorMsg || 'Please check your input and try again.';
+      } else if (err.status === 0 || !navigator.onLine) {
+        // Connection error
+        errorMsg = 'We are having trouble connecting to the AURA core. Please check your internet and try again in a moment.';
       }
+
+      console.log('[v0] Setting error:', errorMsg);
+      setError(errorMsg);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -81,7 +147,41 @@ const Signup = () => {
           </motion.div>
         </div>
 
+        {showSuccess && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-green-50 border-2 border-green-300 rounded-xl flex items-start gap-3"
+          >
+            <div className="flex-shrink-0 mt-0.5">
+              <Check className="w-5 h-5 text-green-600" />
+            </div>
+            <div className="flex-1">
+              <p className="text-green-800 text-sm font-semibold">Welcome to AURA!</p>
+              <p className="text-green-700 text-xs mt-1">Your journey is beginning. Redirecting to login...</p>
+            </div>
+          </motion.div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="p-4 bg-red-50 border-2 border-red-300 rounded-xl flex items-start gap-3"
+            >
+              <div className="flex-shrink-0 mt-0.5">
+                <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-red-800 text-sm font-medium">{error}</p>
+              </div>
+            </motion.div>
+          )}
+
           <div className="space-y-1 relative group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#A79FC4]">
               <User size={18} />
@@ -196,10 +296,10 @@ const Signup = () => {
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
             type="submit"
-            disabled={!fullName.trim() || !email.trim() || !password.trim() || password !== confirmPassword || !isPasswordValid || !agree}
+            disabled={!fullName.trim() || !email.trim() || !password.trim() || password !== confirmPassword || !isPasswordValid || !agree || isLoading || showSuccess}
             className="w-full py-3.5 px-6 bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] hover:from-[#7C3AED] hover:to-[#6D28D9] text-white font-medium rounded-xl shadow-[0_8px_20px_-6px_rgba(139,92,246,0.6)] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm mt-2"
           >
-            Create Account
+            {isLoading ? 'Creating your profile...' : 'Create Account'}
           </motion.button>
         </form>
 
