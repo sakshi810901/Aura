@@ -76,6 +76,26 @@ class APIClient {
   }
 
   /**
+   * Make a POST request with FormData (for OAuth2 login)
+   */
+  async postFormData(endpoint, formData = new FormData(), options = {}) {
+    const url = `${this.baseUrl}${endpoint}`;
+    const headers = {};
+    const token = this.getToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+      ...options,
+    });
+    return this.handleResponse(response);
+  }
+
+  /**
    * Make a PUT request
    */
   async put(endpoint, data = {}, options = {}) {

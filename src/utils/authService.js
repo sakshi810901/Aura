@@ -8,20 +8,27 @@ import { apiClient } from './api';
 class AuthService {
   /**
    * Login user with email and password
+   * Uses OAuth2 form-data format as required by FastAPI
    * @param {string} email - User email
    * @param {string} password - User password
-   * @returns {Promise<object>} - User data and token
+   * @returns {Promise<object>} - Access token and refresh token
    */
   async login(email, password) {
     try {
-      const response = await apiClient.post('/auth/login', {
-        email,
-        password,
-      });
+      // OAuth2 requires form data with "username" field (not "email")
+      const formData = new FormData();
+      formData.append('username', email);
+      formData.append('password', password);
+
+      const response = await apiClient.postFormData('/auth/login', formData);
 
       if (response.access_token) {
         apiClient.setToken(response.access_token);
-        localStorage.setItem('user', JSON.stringify(response.user || {}));
+        if (response.refresh_token) {
+          localStorage.setItem('refresh_token', response.refresh_token);
+        }
+        // Store username (email) for dashboard greeting
+        localStorage.setItem('username', email);
       }
 
       return response;

@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { authService } from '../utils/authService';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,20 +27,44 @@ const Login = () => {
     }
   }, [navigate]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (email.trim() && password.trim()) {
+    setError('');
+    setIsLoading(true);
+
+    if (!email.trim() || !password.trim()) {
+      setError('Please enter both email and password');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // Call the FastAPI login endpoint with OAuth2 format
+      const response = await authService.login(email.trim(), password.trim());
+
+      // Successfully logged in
+      console.log('[v0] Login successful, access_token:', response.access_token ? 'received' : 'missing');
+
       // Role-based routing
       if (email.trim().toLowerCase() === 'consultant' || email.trim().toLowerCase() === 'consultant@aura.com') {
-        localStorage.setItem('username', email.trim());
         localStorage.setItem('role', 'consultant');
         navigate('/consultant-flow');
       } else {
-        localStorage.setItem('username', email.trim());
         localStorage.setItem('role', 'user');
-        // Navigate to welcome setup flow
-        navigate('/welcome-setup');
+        // Check if user has avatar setup
+        if (localStorage.getItem('customAvatar')) {
+          navigate('/avatar-greeting');
+        } else if (localStorage.getItem('faceTexture')) {
+          navigate('/dashboard');
+        } else {
+          navigate('/welcome-setup');
+        }
       }
+    } catch (err) {
+      console.error('[v0] Login error:', err);
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -90,6 +117,16 @@ const Login = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-3 bg-red-50 border border-red-200 rounded-lg"
+            >
+              <p className="text-red-600 text-sm">{error}</p>
+            </motion.div>
+          )}
+          
           <div className="space-y-1 relative group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#A79FC4]">
               <Mail size={18} />
@@ -139,10 +176,10 @@ const Login = () => {
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
             type="submit"
-            disabled={!email.trim() || !password.trim()}
+            disabled={!email.trim() || !password.trim() || isLoading}
             className="w-full py-3.5 px-6 bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] hover:from-[#7C3AED] hover:to-[#6D28D9] text-white font-medium rounded-xl shadow-[0_8px_20px_-6px_rgba(139,92,246,0.6)] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm mb-3"
           >
-            Log In
+            {isLoading ? 'Logging in...' : 'Log In'}
           </motion.button>
           
           <motion.button
