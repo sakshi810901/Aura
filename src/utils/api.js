@@ -152,6 +152,7 @@ class APIClient {
 
     if (!response.ok) {
       let errorMessage = 'An error occurred. Please try again.';
+      console.log('[v0] API Error Response:', { status: response.status, data });
 
       // Handle FastAPI validation errors
       if (data.detail) {
@@ -178,20 +179,22 @@ class APIClient {
       }
 
       // Map specific HTTP status codes to user-friendly messages
-      if (response.status === 401) {
+      // Only override if no specific error message was found
+      if (response.status === 401 && !errorMessage.includes('Invalid')) {
         errorMessage = 'Invalid email or password. Please try again.';
-      } else if (response.status === 422) {
-        errorMessage = errorMessage || 'Please check your input and try again.';
-      } else if (response.status === 409) {
-        errorMessage = errorMessage || 'This account already exists.';
-      } else if (response.status === 404) {
+      } else if (response.status === 422 && errorMessage === 'An error occurred. Please try again.') {
+        errorMessage = 'Please check your input and try again.';
+      } else if (response.status === 409 && errorMessage === 'An error occurred. Please try again.') {
+        errorMessage = 'This account already exists.';
+      } else if (response.status === 404 && errorMessage === 'An error occurred. Please try again.') {
         errorMessage = 'Resource not found.';
-      } else if (response.status === 500) {
+      } else if (response.status === 500 && errorMessage === 'An error occurred. Please try again.') {
         errorMessage = 'Server error. Please try again later.';
-      } else if (response.status === 503) {
+      } else if (response.status === 503 && errorMessage === 'An error occurred. Please try again.') {
         errorMessage = 'Service temporarily unavailable. Please try again later.';
       }
 
+      console.log('[v0] Final error message:', errorMessage);
       const error = new Error(errorMessage);
       error.status = response.status;
       error.data = data;
