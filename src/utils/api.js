@@ -138,6 +138,7 @@ class APIClient {
 
   /**
    * Handle API response and errors
+   * Extracts detailed error messages from FastAPI responses
    */
   async handleResponse(response) {
     const contentType = response.headers.get('content-type');
@@ -150,7 +151,48 @@ class APIClient {
     }
 
     if (!response.ok) {
-      const error = new Error(data.detail || data.message || 'API Error');
+      let errorMessage = 'An error occurred. Please try again.';
+
+      // Handle FastAPI validation errors
+      if (data.detail) {
+        if (Array.isArray(data.detail)) {
+          // FastAPI validation error format: array of objects
+          errorMessage = data.detail
+            .map((err) => {
+              if (err.msg) {
+                return err.msg;
+              }
+              if (typeof err === 'string') {
+                return err;
+              }
+              return 'Validation error';
+            })
+            .join(', ');
+        } else if (typeof data.detail === 'string') {
+          errorMessage = data.detail;
+        }
+      } else if (data.message) {
+        errorMessage = data.message;
+      } else if (typeof data === 'string') {
+        errorMessage = data;
+      }
+
+      // Map specific HTTP status codes to user-friendly messages
+      if (response.status === 401) {
+        errorMessage = 'Invalid email or password. Please try again.';
+      } else if (response.status === 422) {
+        errorMessage = errorMessage || 'Please check your input and try again.';
+      } else if (response.status === 409) {
+        errorMessage = errorMessage || 'This account already exists.';
+      } else if (response.status === 404) {
+        errorMessage = 'Resource not found.';
+      } else if (response.status === 500) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (response.status === 503) {
+        errorMessage = 'Service temporarily unavailable. Please try again later.';
+      }
+
+      const error = new Error(errorMessage);
       error.status = response.status;
       error.data = data;
       throw error;

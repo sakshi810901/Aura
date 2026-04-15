@@ -12,13 +12,22 @@ class AuthService {
    * @param {string} email - User email
    * @param {string} password - User password
    * @returns {Promise<object>} - Access token and refresh token
+   * @throws {Error} - With user-friendly error message
    */
   async login(email, password) {
     try {
+      // Validate inputs
+      if (!email || !email.trim()) {
+        throw new Error('Please enter your email address');
+      }
+      if (!password || !password.trim()) {
+        throw new Error('Please enter your password');
+      }
+
       // OAuth2 requires form data with "username" field (not "email")
       const formData = new FormData();
-      formData.append('username', email);
-      formData.append('password', password);
+      formData.append('username', email.trim());
+      formData.append('password', password.trim());
 
       const response = await apiClient.postFormData('/auth/login', formData);
 
@@ -28,13 +37,17 @@ class AuthService {
           localStorage.setItem('refresh_token', response.refresh_token);
         }
         // Store username (email) for dashboard greeting
-        localStorage.setItem('username', email);
+        localStorage.setItem('username', email.trim());
+      } else {
+        throw new Error('Login failed: No access token received from server');
       }
 
       return response;
     } catch (error) {
-      console.error('Login error:', error);
-      throw error;
+      // Re-throw with proper error message
+      const errorMsg = error.message || 'Login failed. Please try again.';
+      console.error('[v0] Login error:', errorMsg);
+      throw new Error(errorMsg);
     }
   }
 
