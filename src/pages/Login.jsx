@@ -29,7 +29,8 @@ const Login = () => {
     if (email.trim() && password.trim()) {
       // Role-based routing
       if (email.trim().toLowerCase() === 'consultant' || email.trim().toLowerCase() === 'consultant@aura.com') {
-        localStorage.setItem('username', email.trim());
+        localStorage.setItem('username', 'Dr. Sharma');
+        localStorage.setItem('userEmail', email.trim());
         localStorage.setItem('role', 'consultant');
         navigate('/consultant-flow');
       } else {

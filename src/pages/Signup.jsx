@@ -18,8 +18,9 @@ const Signup = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (fullName.trim() && email.trim() && password.trim() && password === confirmPassword && agree) {
-      // Simulate signup with dummy data
-      localStorage.setItem('username', email.trim());
+      // Simulate signup with dummy data - store full profile
+      localStorage.setItem('username', fullName.trim());
+      localStorage.setItem('userEmail', email.trim());
       localStorage.setItem('role', role);
 
       // Route based on role
